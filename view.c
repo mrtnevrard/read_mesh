@@ -14,8 +14,8 @@ int main(){
   int num,type,n_elements,i;
   double R[3],vec1[3],vec2[3],norm[3],surface;
 
-  fichier2=fopen("view1.pos","w");
-  fichier1=fopen("test_norm.dat","r");
+  fichier2=fopen("3144210020_readed.pos","w");
+  fichier1=fopen("3144210020_readed.dat","r");
 
 
   fprintf(fichier2,"View \"Field\" {\n");
@@ -25,7 +25,7 @@ int main(){
   for(i=0 ; i<n_elements ; i++){
   fscanf(fichier1,"%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",&num,&type,&R[0],&R[1],&R[2],&vec1[0],&vec1[1],&vec1[2],&vec2[0],&vec2[1],&vec2[2],&norm[0],&norm[1],&norm[2],&surface);
 
-  fprintf(fichier2,"VP(%lf,%lf,%lf){%lf,%lf,%lf}\;\n",R[0],R[1],R[2],norm[0],norm[1],norm[2]);
+  fprintf(fichier2,"VP(%lf,%lf,%lf){%lf,%lf,%lf};\n",R[0],R[1],R[2],norm[0],norm[1],norm[2]);
   
   }
   fprintf(fichier2,"};");
