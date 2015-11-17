@@ -1,21 +1,50 @@
+/************************************************************************************************
+
+Main program : - read msh files and calculate position of vectors and normales
+               - rotating objects
+
+
+************************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #include <math.h>
 #include <string.h>
-#include "header.h"
-
+#include <time.h>
+#include "header_main.h"
+#include <sys/time.h>
 int main(){
   
-  FILE* fichier1,*fichier2;
+  float temps;
+  clock_t t1, t2;
+  FILE* folder1,*folder2;
+  int n_elements,q;
+  int* type_of;
+  double** R;
+  double** vec1;
+  double** vec2;
+  double** norm;
+  double* surface;
+  double** center;
   char ligne1[256];
-  int i,n_nodes,nothing,n_elements1,n_elements,**element,**element1,n_tag,*type_of1,*type_of,j,k,a,type2,test_noeuds,test_elements1,test_elements2,l;
-  double** node,**norm1,**norm,**vec11,**vec1,**vec21,**vec2,**R1,**R,*surface1,*surface,**center1,**center;
+  int i,n_nodes,nothing,n_elements1,**element,**element1,n_tag,*type_of1,j,k,a,type2,test_noeuds,test_elements1,test_elements2,l;
+  double** node,**norm1,**vec11,**vec21,**R1,*surface1,**center1;
+  double *phi_init,*theta_init;
+  int c;
+  int n_angles = 0;
+  double* proba_angles,aleat,real_rand,real_rand_max;
+ 
+  struct timeval start;
+
+  gettimeofday(&start, NULL);
+ 
   
-  
-  
-  
+  t1 = clock();
+  q=start.tv_usec;
+  printf("%d\n",q);
+ 
+  srand(q);
   test_noeuds=0;
   test_elements1=0;
   test_elements2=0;
@@ -24,19 +53,21 @@ int main(){
   //-------------------ouverture du fichier .msh---------------------------------
   
   
-  fichier1=fopen("meshing.msh","r");
-  fichier2=fopen("meshing_readed.dat","w");
+  folder1=fopen("meshing.msh","r");
+  
   
   //-------------------------lignes inintéressantes------------------------------
   
   for(i=1 ; i<7 ; i++){
-    fscanf(fichier1,"%s \n",ligne1);
+    fscanf(folder1,"%s \n",ligne1);
   }
   
+
+
   
   
   //---------------------allocations du nombre de noeuds-----------------------
-  fscanf(fichier1,"%d \n",&n_nodes);
+  fscanf(folder1,"%d \n",&n_nodes);
   node = (double**)calloc( n_nodes , sizeof(double*));
   
   
@@ -46,25 +77,25 @@ int main(){
   
   for(i=0 ; i<n_nodes ; i++){
     
-    fscanf(fichier1,"%d %lf %lf %lf \n",&nothing,& node[i][0],&node[i][1],&node[i][2]);  
+    fscanf(folder1,"%d %lf %lf %lf \n",&nothing,& node[i][0],&node[i][1],&node[i][2]);  
   }
   
   test_noeuds=nothing;
   if(test_noeuds!=n_nodes){
     
     printf("ERROR!!, the number of noeuds is not the same that annonced");
-    return 1;
+    exit(1);
     
   }
   
   
   //------------------éléments inintéressants---------------------------
   
-  fscanf(fichier1,"%s \n",ligne1);
-  fscanf(fichier1,"%s \n",ligne1);
+  fscanf(folder1,"%s \n",ligne1);
+  fscanf(folder1,"%s \n",ligne1);
   
   //-----------------nombre d'éléments----------------------------
-  fscanf(fichier1,"%d\n",&n_elements1);
+  fscanf(folder1,"%d\n",&n_elements1);
   
   element1 = (int**)calloc( n_elements1 , sizeof(int*));
   type_of1 = (int*)calloc( n_elements1,sizeof(int));
@@ -90,7 +121,7 @@ int main(){
   for( i = 0 ; i < n_elements1 ; i++ )
     {
       
-      fscanf(fichier1,"%d %d %d",&a,&type_of1[i],&n_tag);
+      fscanf(folder1,"%d %d %d",&a,&type_of1[i],&n_tag);
       
       
       
@@ -108,7 +139,7 @@ int main(){
         test_elements1++;
 	
 	for ( j=0 ; j<n_tag ; j++ ){
-	  fscanf(fichier1,"%d ",&nothing);
+	  fscanf(folder1,"%d ",&nothing);
 	}
 	
 	
@@ -121,13 +152,13 @@ int main(){
 	
 	
 	if(type_of1[i]==2){
-	  fscanf(fichier1,"%d %d %d \n",&element1[i][0],&element1[i][1],&element1[i][2]);
+	  fscanf(folder1,"%d %d %d \n",&element1[i][0],&element1[i][1],&element1[i][2]);
 	  
 	  
 	}
 	
 	else{
-	  fscanf(fichier1,"%d %d %d %d\n",&element1[i][0],&element1[i][1],&element1[i][2],&element1[i][3]);
+	  fscanf(folder1,"%d %d %d %d\n",&element1[i][0],&element1[i][1],&element1[i][2],&element1[i][3]);
 	}
 	
 	for(k=0;k<3;k++){
@@ -188,7 +219,7 @@ int main(){
 	test_elements2++;
 	
 	for ( j=0 ; j<n_tag ; j++ ){
-	  fscanf(fichier1,"%d",&nothing);
+	  fscanf(folder1,"%d",&nothing);
 	}
 	
 	
@@ -206,10 +237,10 @@ int main(){
 	for( j=0 ; j<=type2 ; j++ ){
 	  
 	  if(j!=type2){
-	    fscanf(fichier1,"%d",&nothing);
+	    fscanf(folder1,"%d",&nothing);
 	  }
 	  else{
-	    fscanf(fichier1,"%d\n",&nothing);
+	    fscanf(folder1,"%d\n",&nothing);
 	  }	  
 	}
 	
@@ -223,12 +254,12 @@ int main(){
   if(test_elements1!=n_elements1-test_elements2){
     
     printf("ERROR!, the number of physical surfaces is not the same that announced"); 
-    return 1;
+    exit(1);
   }
   
   n_elements=test_elements1;
   
-  fclose(fichier1);
+  fclose(folder1);
   
   
   
@@ -260,7 +291,7 @@ int main(){
    
   
   
-  fprintf(fichier2,"%d\n",n_elements);
+ 
   
   
   
@@ -303,27 +334,99 @@ int main(){
 	
       }
       
-      fprintf(fichier2,"%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n",l+1,type_of[l],R[l][0],R[l][1],R[l][2],vec1[l][0],vec1[l][1],vec1[l][2],vec2[l][0],vec2[l][1],vec2[l][2],norm[l][0],norm[l][1],norm[l][2],surface[l],center[l][0],center[l][1],center[l][2]);
+     
       l++;
     }
     
     
     
   }
+ 
   
-  
-  free(element1);
-  free(type_of1);
-  free(norm1);
-  free(vec11);
-  free(vec21);
-  free(R1);
-  free(surface1);
-  free(center1);
+
   
   
   
-  fclose(fichier2);
+  fclose(folder1);
+
+
+
+
+
+  /*
+
+*******************    end of the reading of the folder.*************************************************
+
+   */
+
+
+  folder2= fopen("test_distrib.txt","r");
+
+ 
+  
+
+
+  while((c=fgetc(folder2)) != EOF)
+    {
+      if(c=='\n'){
+	n_angles++;
+	
+      }
+      
+      
+      
+    }
+  fclose(folder2);
+  
+  theta_init = (double*) calloc(n_angles,sizeof(double));
+  phi_init = (double*) calloc(n_angles,sizeof(double));
+  proba_angles = (double*) calloc(n_angles,sizeof(double));
+  folder2 = fopen("test_distrib.txt","r");
+  
+  
+  for ( i=0 ; i<n_angles ; i++){
+    
+    
+    
+    fscanf(folder2,"%d %lf %lf %lf\n",&nothing,&theta_init[i],&phi_init[i],&proba_angles[i]);
+      
+       
+      
+      }
+  
+
+  real_rand=rand();
+  real_rand_max=RAND_MAX;
+  
+  aleat=real_rand/real_rand_max;
+
+  printf("rand = %lf\n",aleat);
+
+  for(i=0 ; i<10 ; i++)
+
+    {
+
+
+  real_rand=rand();
+  real_rand_max=RAND_MAX;
+  
+  aleat=real_rand/(real_rand_max);
+
+  printf("rand = %lf\n",aleat);
+      
+
+    }
+  
+  
+  
+  
+  
+  
+  t2 = clock();
+  
+  
+  temps=(t2-t1)/1000.;
+  printf("time of run (s) : %f\n",temps);
   
   return 0;
 }

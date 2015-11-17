@@ -1,4 +1,4 @@
-Merge "3144210020.stp";
+Merge "HAV_Version_2.VErro.STEP";
 
 /*
 Mesh.CharacteristicLengthFromCurvature = 1;

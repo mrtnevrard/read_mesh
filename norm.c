@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <string.h>
-#include "header.h"
+#include "header_main.h"
 
 
 double* vecprod(double vec1[3],double vec2[3]){
